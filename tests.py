@@ -34,7 +34,6 @@ class DetectChangesTests(unittest.TestCase):
                 {"name": "Order 1", "priority": "HIGH"},
                 {"name": "Order 1", "channel": "Lazada"},
             )
-            print(result)
     
             self.assertEqual(
                 result,
@@ -110,6 +109,27 @@ class DetectChangesTests(unittest.TestCase):
             result,
             [FieldChange("customer.address.city", "HCM", "Hanoi", ChangeType.MODIFIED)],
         )
+        
+    def test_nested_field_modified_uses_dot_path_v2(self):
+            result = detectChanges(
+                {
+                    "customer": {
+                        "name": "Alice",
+                        "address": {"city": {"a":"1"}, "country": "VN"},
+                    }
+                },
+                {
+                    "customer": {
+                        "name": "Alice",
+                        "address": {"city": "Hanoi", "country": "VN"},
+                    }
+                },
+            )
+    
+            self.assertEqual(
+                result,
+                [FieldChange("customer.address.city", {"a":"1"}, "Hanoi", ChangeType.MODIFIED)],
+            )
 
     def test_nested_fields_added_and_removed(self):
         result = detectChanges(
